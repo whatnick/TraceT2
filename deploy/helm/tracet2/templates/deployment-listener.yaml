@@ -38,7 +38,8 @@ spec:
         - name: listener
           image: {{ include "tracet2.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: {{- toYaml .Values.listener.command | nindent 12 }}
+          command: ["/entrypoint.sh"]
+          args: {{- toYaml .Values.listener.command | nindent 12 }}
           envFrom:
             - secretRef:
                 name: {{ include "tracet2.secretName" . }}

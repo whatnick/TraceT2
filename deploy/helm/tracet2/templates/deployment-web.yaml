@@ -38,7 +38,7 @@ spec:
         - name: migrate
           image: {{ include "tracet2.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["uv", "run", "./manage.py", "migrate", "--noinput"]
+          command: ["/entrypoint.sh", "sh", "-c", "uv run ./manage.py migrate --noinput && uv run ./manage.py createcachetable"]
           envFrom:
             - secretRef:
                 name: {{ include "tracet2.secretName" . }}
@@ -55,7 +55,8 @@ spec:
         - name: web
           image: {{ include "tracet2.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: {{- toYaml .Values.web.command | nindent 12 }}
+          command: ["/entrypoint.sh"]
+          args: {{- toYaml .Values.web.command | nindent 12 }}
           envFrom:
             - secretRef:
                 name: {{ include "tracet2.secretName" . }}
@@ -72,6 +73,9 @@ spec:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: {{ .Values.env.BASEURL | trimPrefix "https://" | trimPrefix "http://" | quote }}
             initialDelaySeconds: 10
             periodSeconds: 30
             failureThreshold: 3
@@ -79,6 +83,9 @@ spec:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: {{ .Values.env.BASEURL | trimPrefix "https://" | trimPrefix "http://" | quote }}
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:

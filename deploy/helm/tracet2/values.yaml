@@ -90,7 +90,8 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext:
-  fsGroup: 1000
+  seLinuxOptions:
+    type: spc_t
 
 securityContext: {}
 

@@ -92,7 +92,7 @@ WSGI_APPLICATION = "project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path(os.getenv("DATABASE_PATH", BASE_DIR / "db.sqlite3")),
         # These additional options are taken from https://blog.pecar.me/sqlite-django-config
         "OPTIONS": {
             "transaction_mode": "IMMEDIATE",
@@ -186,6 +186,9 @@ EMAIL_HOST_PASSWORD = os.getenv("SMTP_PASSWORD")
 MWA_SWEET_SPOTS_PATH = BASE_DIR / "tracet/data/MWASweetSpots.txt"
 
 
+LOG_DIR = Path(os.getenv("LOG_DIR", BASE_DIR / "logs"))
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -201,12 +204,12 @@ LOGGING = {
         },
         "file": {
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/log.log",
+            "filename": LOG_DIR / "log.log",
             "formatter": "verbose",
         },
         "listen": {
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/listen.log",
+            "filename": LOG_DIR / "listen.log",
             "formatter": "verbose",
         },
     },

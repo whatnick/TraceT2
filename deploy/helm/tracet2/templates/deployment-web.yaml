@@ -75,7 +75,7 @@ spec:
               port: http
               httpHeaders:
                 - name: Host
-                  value: {{ .Values.env.BASEURL | trimPrefix "https://" | trimPrefix "http://" | quote }}
+                  value: {{ .Values.probeHost | default "localhost" | quote }}
             initialDelaySeconds: 10
             periodSeconds: 30
             failureThreshold: 3
@@ -85,7 +85,7 @@ spec:
               port: http
               httpHeaders:
                 - name: Host
-                  value: {{ .Values.env.BASEURL | trimPrefix "https://" | trimPrefix "http://" | quote }}
+                  value: {{ .Values.probeHost | default "localhost" | quote }}
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:

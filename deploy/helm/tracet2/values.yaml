@@ -9,22 +9,28 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# -- Environment variables (non-sensitive)
-env:
-  BASEURL: "http://localhost"
-  DJANGO_DEBUG: "false"
-  KAFKA_GROUP_ID: "tracet2"
+# -- Environment variables (non-sensitive), injected into all containers
+env: {}
+  # BASEURL: "https://tracet2.example.com"
+  # DJANGO_DEBUG: "false"
+  # KAFKA_GROUP_ID: "tracet2"
+  # DJANGO_ALLOWED_HOSTS: "tracet2.example.com,localhost"
 
-# -- Sensitive environment variables (stored in Secret)
-# Set these via --set or a secrets values file
-secret:
-  DJANGO_SECRET_KEY: ""
-  SMTP_HOST: ""
-  SMTP_USER: ""
-  SMTP_PASSWORD: ""
+# -- Sensitive environment variables (stored in a Secret)
+# Set via --set or a separate secrets values file
+secret: {}
+  # DJANGO_SECRET_KEY: ""
+  # SMTP_HOST: ""
+  # SMTP_USER: ""
+  # SMTP_PASSWORD: ""
 
 # -- Use an existing secret instead of creating one
 existingSecret: ""
+
+# -- Host header value for health check probes.
+# Must be a hostname that Django's ALLOWED_HOSTS will accept.
+# If empty, defaults to "localhost".
+probeHost: ""
 
 # -- Web (gunicorn) deployment
 web:
@@ -53,9 +59,7 @@ persistence:
   storageClass: ""
   accessMode: ReadWriteOnce
   size: 1Gi
-  # Mount path inside the container
   mountPath: /tracet/data
-  # Existing PVC name (leave empty to create one)
   existingClaim: ""
 
 service:
@@ -67,13 +71,11 @@ ingress:
   enabled: false
   className: ""
   annotations: {}
-    # kubernetes.io/ingress.class: alb
-    # alb.ingress.kubernetes.io/scheme: internet-facing
-  hosts:
-    - host: tracet2.example.com
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+  #  - host: tracet2.example.com
+  #    paths:
+  #      - path: /
+  #        pathType: Prefix
   tls: []
   #  - secretName: tracet2-tls
   #    hosts:
@@ -96,6 +98,6 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-# -- Init container to run Django migrations
+# -- Run Django migrations as an init container
 migrate:
   enabled: true

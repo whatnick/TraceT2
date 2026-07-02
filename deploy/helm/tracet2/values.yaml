@@ -1,0 +1,101 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/whatnick/tracet2
+  tag: ""  # Defaults to Chart appVersion
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Environment variables (non-sensitive)
+env:
+  BASEURL: "http://localhost"
+  DJANGO_DEBUG: "false"
+  KAFKA_GROUP_ID: "tracet2"
+
+# -- Sensitive environment variables (stored in Secret)
+# Set these via --set or a secrets values file
+secret:
+  DJANGO_SECRET_KEY: ""
+  SMTP_HOST: ""
+  SMTP_USER: ""
+  SMTP_PASSWORD: ""
+
+# -- Use an existing secret instead of creating one
+existingSecret: ""
+
+# -- Web (gunicorn) deployment
+web:
+  command: ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "project.wsgi"]
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+# -- Kafka listener deployment
+listener:
+  enabled: true
+  command: ["uv", "run", "./manage.py", "listen"]
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+# -- Persistent volume for SQLite database and logs
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  # Mount path inside the container
+  mountPath: /tracet/data
+  # Existing PVC name (leave empty to create one)
+  existingClaim: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: alb
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+  hosts:
+    - host: tracet2.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: tracet2-tls
+  #    hosts:
+  #      - tracet2.example.com
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -- Init container to run Django migrations
+migrate:
+  enabled: true

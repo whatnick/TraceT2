@@ -25,5 +25,9 @@ RUN uv sync --locked
 # Collect static files (dummy key for build only)
 RUN mkdir -p /tracet/logs && DJANGO_SECRET_KEY=build-placeholder uv run python manage.py collectstatic --noinput
 
+COPY deploy/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "project.wsgi"]
